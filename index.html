@@ -790,10 +790,6 @@ function showLoading() {
 }
 
 function renderResult({ mbti, element }) {
-  const p = PROFILES[mbti];
-  const defaultEl = p.el;
-  const isCross = element !== defaultEl;
-
   const key = mbti + '-' + element;
   const p = PROFILES[key] || PROFILES[mbti + '-' + defaults[mbti]];
   const defaultEl = p.defaultEl;
