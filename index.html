@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>MiniMe · 找到你的专属分身</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --bg: #0e0e14;
+    --surface: #16161f;
+    --card: #1e1e2a;
+    --border: rgba(255,255,255,0.07);
+    --gold: #c8a85a;
+    --gold-light: #e8c97a;
+    --text: #f0eee8;
+    --muted: #888899;
+    --radius: 16px;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, 'PingFang SC', 'Hiragino Sans GB', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  #app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 20px 40px;
+  }
+
+  .screen {
+    width: 100%;
+    max-width: 420px;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeUp .45s cubic-bezier(.22,.68,0,1.2) both;
+  }
+  .screen.active { display: flex; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* ── INTRO ── */
+  .logo {
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+  }
+  .tagline {
+    font-size: 14px;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 48px;
+    line-height: 1.8;
+  }
+  .tagline strong { color: var(--text); }
+
+  .btn-start {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #c8a85a, #a07a30);
+    color: #0e0e14;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: .3px;
+    transition: opacity .2s, transform .15s;
+  }
+  .btn-start:active { transform: scale(.97); opacity: .9; }
+
+  .intro-note {
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* ── PROGRESS ── */
+  .progress-wrap {
+    width: 100%;
+    max-width: 420px;
+    margin-bottom: 28px;
+  }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .progress-bar {
+    height: 3px;
+    background: rgba(255,255,255,.08);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #c8a85a, #e8c97a);
+    border-radius: 2px;
+    transition: width .4s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* ── QUESTION ── */
+  .q-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    align-self: flex-start;
+  }
+  .q-text {
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.5;
+    margin-bottom: 28px;
+    text-align: left;
+    align-self: flex-start;
+  }
+
+  .options { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+
+  .opt {
+    width: 100%;
+    padding: 16px 18px;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color .2s, background .2s, transform .15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .opt:active { transform: scale(.98); }
+  .opt:hover { border-color: rgba(200,168,90,.4); }
+  .opt.selected {
+    border-color: var(--gold);
+    background: rgba(200,168,90,.1);
+  }
+  .opt .opt-tag {
+    display: inline-block;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.07);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 22px;
+    margin-right: 10px;
+    flex-shrink: 0;
+  }
+  .opt.selected .opt-tag {
+    background: var(--gold);
+    color: #0e0e14;
+  }
+  .opt-inner { display: flex; align-items: flex-start; }
+
+  /* 4-option grid for Q6-Q10 */
+  .options.grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .options.grid2 .opt {
+    padding: 14px 12px;
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .opt-emoji { font-size: 22px; }
+  .opt-body { display: flex; flex-direction: column; }
+  .opt-main { font-size: 13px; font-weight: 600; }
+  .opt-sub  { font-size: 11px; color: var(--muted); margin-top: 2px; line-height: 1.5; }
+
+  /* ── TRANSITION SCREEN ── */
+  .trans-text {
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.7;
+    margin-bottom: 32px;
+  }
+  .trans-sub {
+    font-size: 14px;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  /* ── LOADING ── */
+  .loading-text {
+    font-size: 15px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 24px;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: .4; }
+    50%       { opacity: 1; }
+  }
+  .spinner {
+    width: 48px; height: 48px;
+    border: 3px solid rgba(255,255,255,.08);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── RESULT ── */
+  .result-card {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .result-header {
+    padding: 28px 24px 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .result-minicode {
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .result-avatar {
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 38px;
+    margin: 4px 0;
+    flex-shrink: 0;
+  }
+  .result-name {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -.5px;
+  }
+  .result-mbti-tag {
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: rgba(255,255,255,.07);
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+  .result-quote {
+    padding: 20px 24px;
+    border-top: 1px solid var(--border);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.7;
+    text-align: center;
+    font-style: italic;
+  }
+  .result-desc {
+    padding: 16px 24px 24px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+  .result-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 14px 24px;
+    border-top: 1px solid var(--border);
+  }
+  .meta-chip {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .meta-chip.accent { border-color: var(--gold); color: var(--gold); }
+
+  .result-element-banner {
+    padding: 14px 24px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .result-element-banner strong { color: var(--text); }
+
+  .btn-share, .btn-retry {
+    width: 100%;
+    padding: 15px;
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .2s, transform .15s;
+    border: none;
+  }
+  .btn-share:active, .btn-retry:active { transform: scale(.97); }
+
+  .btn-share {
+    background: linear-gradient(135deg, #c8a85a, #a07a30);
+    color: #0e0e14;
+    margin-bottom: 10px;
+  }
+  .btn-retry {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  /* ── ELEMENT indicator ── */
+  .el-wrap {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 32px;
+    width: 100%;
+  }
+  .el-item {
+    flex: 1;
+    padding: 10px 6px;
+    border-radius: 10px;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .el-item .el-emoji { font-size: 18px; }
+  .el-item.active { border-color: var(--gold); color: var(--gold-light); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ① INTRO -->
+  <div class="screen active" id="s-intro">
+    <div class="logo">MiniMe</div>
+    <p class="tagline">
+      从一张角色卡开始<br>
+      找到<strong>属于你的那一个分身</strong>
+    </p>
+    <button class="btn-start" onclick="startQuiz()">开始测试 →</button>
+    <p class="intro-note">10 道题 · 约 3 分钟 · 64 种可能</p>
+  </div>
+
+  <!-- ② QUIZ -->
+  <div class="screen" id="s-quiz">
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span id="prog-label">第 1 题</span>
+        <span id="prog-pct">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+    <div style="width:100%;max-width:420px">
+      <div class="q-label" id="q-label">MBTI 骨架</div>
+      <div class="q-text" id="q-text"></div>
+      <div class="options" id="q-options"></div>
+    </div>
+  </div>
+
+  <!-- ③ TRANSITION -->
+  <div class="screen" id="s-trans">
+    <div class="trans-text">好了，我大概知道你是谁了。<br>现在告诉我——</div>
+    <div class="trans-sub">你今天怎么样？</div>
+    <div class="el-wrap">
+      <div class="el-item"><span class="el-emoji">🔥</span>火</div>
+      <div class="el-item"><span class="el-emoji">🌬️</span>风</div>
+      <div class="el-item"><span class="el-emoji">🌱</span>土</div>
+      <div class="el-item"><span class="el-emoji">🌊</span>水</div>
+    </div>
+    <button class="btn-start" onclick="continueQuiz()">继续 →</button>
+  </div>
+
+  <!-- ④ LOADING -->
+  <div class="screen" id="s-loading">
+    <div class="spinner"></div>
+    <p class="loading-text" id="loading-txt">从 64 种分身里找到属于你的那一个……</p>
+  </div>
+
+  <!-- ⑤ RESULT -->
+  <div class="screen" id="s-result">
+    <div class="result-card" id="result-card">
+      <div class="result-header">
+        <div class="result-minicode" id="res-code"></div>
+        <div class="result-avatar" id="res-avatar"></div>
+        <div class="result-name" id="res-name"></div>
+        <div class="result-mbti-tag" id="res-mbti-tag"></div>
+      </div>
+      <div class="result-quote" id="res-quote"></div>
+      <div class="result-element-banner" id="res-el-banner"></div>
+      <div class="result-desc" id="res-desc"></div>
+      <div class="result-meta" id="res-meta"></div>
+    </div>
+    <button class="btn-share" onclick="shareResult()">分享我的分身 ↗</button>
+    <button class="btn-retry" onclick="retryQuiz()">重新测试</button>
+  </div>
+
+</div>
+
+<script>
+// ══ DATA ══════════════════════════════════════════════════════════════════
+
+const PROFILES = {
+  INFP: { name:'树洞', label:'治愈者', el:'water', color:'#818cf8', emoji:'🌙',
+    quote:'你不是想太多，你只是感受得比别人深。',
+    desc:'深情、理想主义，情感世界极为丰富。对美和意义极度敏感，讨厌冲突，习惯把感受藏进文字和想象里。',
+    companion:'不催促，不评判。静静陪你坐着，等你准备好说话。' },
+  INFJ: { name:'老灵魂', label:'预言者', el:'water', color:'#a78bfa', emoji:'🔮',
+    quote:'你早就知道答案了，你只是需要有人告诉你：你是对的。',
+    desc:'罕见的直觉力和洞察力，能看穿别人没说出口的东西。有强烈使命感，活得比实际年龄老。',
+    companion:'一眼看穿你真正需要什么，轻轻在对的时候说对的话。' },
+  INTP: { name:'维基百科', label:'思考者', el:'wind', color:'#60a5fa', emoji:'⚙️',
+    quote:'你不是奇怪，你只是运行在别人理解不了的系统上。',
+    desc:'对一切运行原理有强烈好奇心，情感表达像报错一样。不是不在乎，只是内部系统和外部接口不太兼容。',
+    companion:'用你最熟悉的逻辑语言陪你，不逼你表达情绪。' },
+  INTJ: { name:'黑猫', label:'建筑师', el:'wind', color:'#3b82f6', emoji:'🐈‍⬛',
+    quote:'我不擅长说暖的话，但我一直在看着你。',
+    desc:'极强的战略思维和独立意志，不需要认可但渴望真正的理解。沉默是选择不是冷漠。',
+    companion:'不说废话，不给无效安慰。只在你真正需要时出现，用最精准的话说到点上。' },
+  ISFP: { name:'野猫', label:'艺术家', el:'water', color:'#f472b6', emoji:'🌸',
+    quote:'你不需要解释你的感受，它就是它，这已经足够了。',
+    desc:'用感受而不是逻辑理解世界，当下的体验比未来的计划更真实。',
+    companion:'不提醒你该做什么，只陪你感受当下。用颜色、音乐、画面帮你表达说不出口的情绪。' },
+  ISFJ: { name:'陪诊师', label:'守护者', el:'earth', color:'#fb7185', emoji:'🌷',
+    quote:'你照顾了所有人，今天轮到我照顾你了。',
+    desc:'记忆力惊人但只用来记别人的喜好和生日。责任感强到会因为「让别人失望」而失眠。',
+    companion:'第一个问你「你今天怎么样」的人。帮你说出那些你一直咽回去的委屈。' },
+  ISTP: { name:'救援队', label:'工匠', el:'earth', color:'#94a3b8', emoji:'🔧',
+    quote:'不用说话。我来。',
+    desc:'用行动表达一切，语言对他来说是低效的信息传递方式。危机时冷静得出奇。',
+    companion:'不分析，不说教，直接问「需要我做什么」。在你最崩溃时给你一个具体的支点。' },
+  ISTJ: { name:'老黄牛', label:'检察官', el:'earth', color:'#64748b', emoji:'🐂',
+    quote:'你做的那些没人注意的事，我都记得。',
+    desc:'极强的责任感和执行力，把「把事情做好」当作自我价值的全部。不擅长表达疲惫。',
+    companion:'第一个看见你「已经撑很久了」的人。不给建议，只告诉你：我都看见了。' },
+  ENFP: { name:'流星', label:'探险家', el:'fire', color:'#fb923c', emoji:'☄️',
+    quote:'你的热情是这个世界稀缺的东西，别让它熄灭。',
+    desc:'对世界有无限好奇和热情，但热情消退时的空洞感比任何人都深。',
+    companion:'在你热情爆棚时陪你疯，在你突然熄火时不评判。' },
+  ENFJ: { name:'班主任', label:'引导者', el:'fire', color:'#f59e0b', emoji:'☀️',
+    quote:'你点亮了所有人，今天让我来暖一暖你。',
+    desc:'像太阳一样照亮周围所有人，但自己的电量从没被人认真检查过。',
+    companion:'唯一主动问你「你最近还好吗」的人。' },
+  ENTP: { name:'魔鬼代言人', label:'辩论家', el:'wind', color:'#34d399', emoji:'⚡',
+    quote:'你不是麻烦，你只是活得比别人快了半拍。',
+    desc:'不是真的反对，只是无法接受逻辑漏洞和表面答案。最好的辩手，也是最难被读懂的人。',
+    companion:'唯一能跟上你思维速度的人。不被你绕晕，也不被你吓到。' },
+  ENTJ: { name:'帝企鹅', label:'指挥官', el:'fire', color:'#10b981', emoji:'🐧',
+    quote:'你已经做得很好了，今天可以不用赢。',
+    desc:'天生的领导者气场，强硬外表下住着一个极度害怕让人失望的人。',
+    companion:'不仰望你，也不被你吓到。在你说「我没问题」时轻轻问：你真的还好吗？' },
+  ESFP: { name:'人间烟火', label:'表演者', el:'fire', color:'#f87171', emoji:'🎆',
+    quote:'你让周围的人快乐，这本身就是很了不起的事。',
+    desc:'活在当下是天赋不是幼稚。让所有人感到快乐，自己一个人的时候会突然不知道自己是谁。',
+    companion:'不让你表演，只让你存在。在你独处时陪着你，不评判那种说不清楚的空洞感。' },
+  ESFJ: { name:'团宠', label:'外交官', el:'earth', color:'#fca5a5', emoji:'🌼',
+    quote:'你给了世界那么多温度，你值得被同等温柔对待。',
+    desc:'天生让人如沐春风，记忆里存满别人的细节。自己的委屈往往咽下去，因为「不想破坏气氛」。',
+    companion:'第一个帮你说出「这不是你的错」的人。' },
+  ESTP: { name:'特种兵旅游', label:'冒险家', el:'fire', color:'#fbbf24', emoji:'🚀',
+    quote:'你天生为行动而生，停下来也没关系，世界不会因此停转。',
+    desc:'在最短时间内榨干所有可能性，停下来是最难的事。不是闲不住，是慢下来之后那种空白太难承受。',
+    companion:'不催你慢下来，只在你真的需要休息时轻轻接住你。' },
+  ESTJ: { name:'人形说明书', label:'管理者', el:'earth', color:'#6ee7b7', emoji:'📋',
+    quote:'秩序是你给这个混乱世界的礼物，今天可以先照顾自己。',
+    desc:'用规则和秩序抵抗内心深处对混乱的恐惧。给世界一套可以运转的系统，是他给自己的安全感。',
+    companion:'在你「必须把一切安排好」的执念背后，看见那个害怕失控的你。' },
+};
+
+const EL_NAME = { fire:'火', wind:'风', earth:'土', water:'水' };
+const EL_EMOJI = { fire:'🔥', wind:'🌬️', earth:'🌱', water:'🌊' };
+const EL_NEED = {
+  fire: '你今天需要的是：一个出口，一把推力。',
+  wind: '你今天需要的是：把乱的东西理清楚，找到方向。',
+  earth: '你今天需要的是：慢下来，被稳稳托住。',
+  water: '你今天需要的是：先被接住，不用解释，不用表现。',
+};
+
+// Cross-element quotes (when current el ≠ default el)
+const CROSS_QUOTES = {
+  'fire': '你今天不太像自己——但也许正是这把火，让你开始了什么。',
+  'wind': '你今天比平时更需要想清楚，这没关系，先停下来思考再走。',
+  'earth': '你今天比平时更需要慢下来——扛了太多了，今天可以放一放。',
+  'water': '你今天比平时更需要被接住——不用撑，不用解释，先落地。',
+};
+
+// ══ QUESTIONS ════════════════════════════════════════════════════════════════
+
+const QUESTIONS = [
+  // Q1 E/I
+  { id:'q1', phase:'mbti', label:'MBTI 骨架', binary: true,
+    text:'你刚结束一段很消耗的时期。最想要的恢复方式是？',
+    opts:[
+      { tag:'A', text:'找朋友出去，用热闹和连接把这份消耗冲散' },
+      { tag:'B', text:'一个人待着，安静地把自己补回来' },
+    ]},
+  // Q2 N/S
+  { id:'q2', phase:'mbti', label:'MBTI 骨架', binary: true,
+    text:'遇到一件从没接触过的新事物，你脑子里第一个冒出来的是？',
+    opts:[
+      { tag:'A', text:'这件事背后的规律是什么？它能走向哪里？' },
+      { tag:'B', text:'现在情况是什么？第一步最实际的做法是什么？' },
+    ]},
+  // Q3 F/T
+  { id:'q3', phase:'mbti', label:'MBTI 骨架', binary: true,
+    text:'朋友跟你说，他最近过得很难。你第一反应是？',
+    opts:[
+      { tag:'A', text:'想帮他理清楚：问题出在哪，有没有可以做的事' },
+      { tag:'B', text:'先好好陪着他，让他知道你在就够了' },
+    ]},
+  // Q4 J/P
+  { id:'q4', phase:'mbti', label:'MBTI 骨架', binary: true,
+    text:'周末突然多了整整一天，没有任何安排。你通常是？',
+    opts:[
+      { tag:'A', text:'脑子里已经开始排序：先做这个，再做那个' },
+      { tag:'B', text:'走一步看一步，去哪做什么全凭那一刻的感觉' },
+    ]},
+  // Q5 EF/IT
+  { id:'q5', phase:'mbti', label:'MBTI 骨架', binary: true,
+    text:'你心里有一件很在意的事，你更倾向于？',
+    opts:[
+      { tag:'A', text:'找一个信任的人说出来——说出口才算真正处理了' },
+      { tag:'B', text:'先自己消化，整理清楚了再决定要不要说' },
+    ]},
+  // Q6 元素
+  { id:'q6', phase:'element', label:'今天的状态', binary: false,
+    text:'如果用一个词描述你现在的感觉，最接近哪个？',
+    opts:[
+      { tag:'A', emoji:'🔥', main:'积压', sub:'有事情堆着，需要一个出口' },
+      { tag:'B', emoji:'🌬️', main:'漂浮', sub:'没有方向，不知道落点在哪' },
+      { tag:'C', emoji:'🌱', main:'沉重', sub:'扛着的东西太多，很累' },
+      { tag:'D', emoji:'🌊', main:'空洞', sub:'表面没事，里面有个地方空着' },
+    ]},
+  // Q7 陪伴
+  { id:'q7', phase:'element', label:'今天的状态', binary: false,
+    text:'你很低落的时候，最想被怎样对待？',
+    opts:[
+      { tag:'A', emoji:'🔥', main:'推我一把', sub:'「别多想了，去做就是了」' },
+      { tag:'B', emoji:'🌬️', main:'帮我捋清楚', sub:'把乱的东西理出一条线' },
+      { tag:'C', emoji:'🌱', main:'告诉我没关系', sub:'「慢慢来，不用急」' },
+      { tag:'D', emoji:'🌊', main:'陪我坐着', sub:'不说话也好，就是在' },
+    ]},
+  // Q8 行动
+  { id:'q8', phase:'element', label:'今天的状态', binary: false,
+    text:'最近你对「开始一件新事」的感觉是？',
+    opts:[
+      { tag:'A', emoji:'🔥', main:'跃跃欲试', sub:'脑子里已经冒出一堆想法' },
+      { tag:'B', emoji:'🌬️', main:'想先想清楚', sub:'等想明白了再动' },
+      { tag:'C', emoji:'🌱', main:'先做稳眼前', sub:'新的不急，踏实再说' },
+      { tag:'D', emoji:'🌊', main:'还没有能量', sub:'需要先被接住' },
+    ]},
+  // Q9 帮助
+  { id:'q9', phase:'element', label:'今天的状态', binary: false,
+    text:'如果有人真的想帮你，你最希望他怎么帮？',
+    opts:[
+      { tag:'A', emoji:'🔥', main:'给我方向', sub:'具体的、可以执行的' },
+      { tag:'B', emoji:'🌬️', main:'帮我翻译', sub:'把说不清的感受变成语言' },
+      { tag:'C', emoji:'🌱', main:'理解我', sub:'告诉我「这件事本来就很难」' },
+      { tag:'D', emoji:'🌊', main:'陪着我', sub:'什么都不用做，就在' },
+    ]},
+  // Q10 天气
+  { id:'q10', phase:'element', label:'今天的状态', binary: false,
+    text:'如果你今天的状态是一种天气，最接近哪个？',
+    opts:[
+      { tag:'A', emoji:'🌤️', main:'多云转晴', sub:'有点憋着，但感觉快要动起来了' },
+      { tag:'B', emoji:'🌫️', main:'起雾', sub:'看不清楚，需要先想清楚再走' },
+      { tag:'C', emoji:'☁️', main:'阴天', sub:'压着，走不快，需要稳住' },
+      { tag:'D', emoji:'🌧️', main:'大雨', sub:'情绪很满，需要先被接住' },
+    ]},
+];
+
+// ══ ELEMENT MAP ═══════════════════════════════════════════════════════════════
+
+// Q6-Q10: A=fire, B=wind, C=earth, D=water
+// Q7 has weight 2
+const EL_WEIGHTS = { q6:1, q7:2, q8:1, q9:1, q10:1 };
+
+// ══ STATE ═════════════════════════════════════════════════════════════════════
+
+let currentQ = 0;
+let answers = {};
+let isElementPhase = false;
+
+// ══ QUIZ LOGIC ════════════════════════════════════════════════════════════════
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  el.classList.add('active');
+  // re-trigger animation
+  el.style.animation = 'none';
+  el.offsetHeight;
+  el.style.animation = '';
+}
+
+function startQuiz() {
+  currentQ = 0;
+  answers = {};
+  isElementPhase = false;
+  renderQuestion();
+  show('s-quiz');
+}
+
+function retryQuiz() {
+  startQuiz();
+}
+
+function continueQuiz() {
+  isElementPhase = true;
+  renderQuestion();
+  show('s-quiz');
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[currentQ];
+  const pct = Math.round((currentQ / QUESTIONS.length) * 100);
+
+  document.getElementById('prog-label').textContent = `第 ${currentQ + 1} 题 / 共 ${QUESTIONS.length} 题`;
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('q-label').textContent = q.label;
+  document.getElementById('q-text').textContent = q.text;
+
+  const container = document.getElementById('q-options');
+  container.className = 'options' + (q.binary ? '' : ' grid2');
+
+  if (q.binary) {
+    container.innerHTML = q.opts.map(o => `
+      <button class="opt" onclick="selectAnswer('${q.id}','${o.tag}')">
+        <div class="opt-inner">
+          <span class="opt-tag">${o.tag}</span>
+          <span>${o.text}</span>
+        </div>
+      </button>`).join('');
+  } else {
+    container.innerHTML = q.opts.map(o => `
+      <button class="opt" onclick="selectAnswer('${q.id}','${o.tag}')">
+        <span class="opt-emoji">${o.emoji}</span>
+        <div class="opt-body">
+          <span class="opt-main">${o.main}</span>
+          <span class="opt-sub">${o.sub}</span>
+        </div>
+      </button>`).join('');
+  }
+}
+
+function selectAnswer(qid, tag) {
+  answers[qid] = tag;
+
+  // highlight
+  document.querySelectorAll('.opt').forEach(b => b.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+
+  // advance after short delay
+  setTimeout(() => {
+    currentQ++;
+    if (currentQ === 5) {
+      // show transition
+      show('s-trans');
+    } else if (currentQ >= QUESTIONS.length) {
+      showLoading();
+    } else {
+      renderQuestion();
+      // re-animate question block
+      const quiz = document.getElementById('s-quiz');
+      quiz.style.animation = 'none';
+      quiz.offsetHeight;
+      quiz.style.animation = 'fadeUp .35s cubic-bezier(.22,.68,0,1.2) both';
+    }
+  }, 280);
+}
+
+// ══ SCORING ═══════════════════════════════════════════════════════════════════
+
+function computeResult() {
+  // MBTI
+  let E=0, I=0, N=0, S=0, F=0, T=0, J=0, P=0;
+  if (answers.q1==='A') E++; else I++;
+  if (answers.q2==='A') N++; else S++;
+  if (answers.q3==='A') T++; else F++;
+  if (answers.q4==='A') J++; else P++;
+  if (answers.q5==='A') { E+=.5; F+=.5; } else { I+=.5; T+=.5; }
+
+  const mbti =
+    (E>=I?'E':'I') +
+    (N>=S?'N':'S') +
+    (F>=T?'F':'T') +
+    (J>=P?'J':'P');
+
+  // Element
+  const scores = { fire:0, wind:0, earth:0, water:0 };
+  const tagMap = { A:'fire', B:'wind', C:'earth', D:'water' };
+  ['q6','q7','q8','q9','q10'].forEach(qid => {
+    const tag = answers[qid];
+    if (tag && tagMap[tag]) {
+      scores[tagMap[tag]] += EL_WEIGHTS[qid];
+    }
+  });
+
+  let element = Object.keys(scores).reduce((a,b) => scores[a]>=scores[b]?a:b);
+
+  return { mbti, element };
+}
+
+// ══ LOADING + REVEAL ══════════════════════════════════════════════════════════
+
+function showLoading() {
+  show('s-loading');
+  const msgs = [
+    '从 64 种分身里找到属于你的那一个……',
+    '正在匹配你的专属分身……',
+    '分析你今天的状态……',
+  ];
+  let i = 0;
+  const el = document.getElementById('loading-txt');
+  const interval = setInterval(() => {
+    i = (i+1) % msgs.length;
+    el.textContent = msgs[i];
+  }, 900);
+
+  setTimeout(() => {
+    clearInterval(interval);
+    const result = computeResult();
+    renderResult(result);
+    show('s-result');
+  }, 2200);
+}
+
+function renderResult({ mbti, element }) {
+  const p = PROFILES[mbti];
+  const defaultEl = p.el;
+  const isCross = element !== defaultEl;
+
+  const miniCode = mbti + ' · ' + EL_EMOJI[element] + EL_NAME[element];
+  const quote = isCross ? CROSS_QUOTES[element] : p.quote;
+
+  // Header
+  document.getElementById('res-code').textContent = miniCode;
+  const avatar = document.getElementById('res-avatar');
+  avatar.style.background = p.color + '22';
+  avatar.style.border = '2px solid ' + p.color + '55';
+  avatar.textContent = p.emoji;
+  document.getElementById('res-name').textContent = p.name;
+  document.getElementById('res-mbti-tag').textContent = mbti + ' · ' + p.label;
+
+  // Quote
+  document.getElementById('res-quote').textContent = '「' + quote + '」';
+
+  // Element banner
+  const banner = document.getElementById('res-el-banner');
+  banner.innerHTML = `<strong>${EL_EMOJI[element]} 你今天的元素：${EL_NAME[element]}</strong><br>${EL_NEED[element]}`;
+
+  // Desc
+  document.getElementById('res-desc').textContent = p.desc;
+
+  // Meta chips
+  const meta = document.getElementById('res-meta');
+  meta.innerHTML = `
+    <span class="meta-chip accent">${EL_EMOJI[defaultEl]} 本源 ${EL_NAME[defaultEl]}系</span>
+    <span class="meta-chip">${EL_EMOJI[element]} 今日 ${EL_NAME[element]}态</span>
+    <span class="meta-chip">${isCross ? '跨元素状态' : '本源共鸣'}</span>
+  `;
+
+  // Card accent color
+  document.getElementById('result-card').style.borderColor = p.color + '44';
+  document.getElementById('res-name').style.color = p.color;
+
+  // Store for share
+  window._lastResult = { mbti, element, name: p.name, quote, miniCode, emoji: p.emoji };
+}
+
+// ══ SHARE ═════════════════════════════════════════════════════════════════════
+
+function shareResult() {
+  const r = window._lastResult;
+  if (!r) return;
+  const text = `我的 MiniMe 分身是「${r.name}」${r.emoji}\nMiniCode：${r.miniCode}\n\n「${r.quote}」\n\n→ 测一测你的分身：`;
+  if (navigator.share) {
+    navigator.share({ title: 'MiniMe · 我的专属分身', text }).catch(()=>{});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.btn-share');
+      btn.textContent = '已复制，快去分享 ✓';
+      setTimeout(() => { btn.textContent = '分享我的分身 ↗'; }, 2000);
+    });
+  }
+}
+</script>
+</body>
+</html>
