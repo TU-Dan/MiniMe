@@ -385,7 +385,7 @@
       找到<strong>属于你的那一个分身</strong>
     </p>
     <button class="btn-start" onclick="startQuiz()">开始测试 →</button>
-    <p class="intro-note">10 道题 · 约 3 分钟 · 64 种可能</p>
+    <p class="intro-note">13 道题 · 约 4 分钟</p>
   </div>
 
   <!-- ② QUIZ -->
@@ -408,19 +408,13 @@
   <div class="screen" id="s-trans">
     <div class="trans-text">好了，我大概知道你是谁了。<br>现在告诉我——</div>
     <div class="trans-sub">你今天怎么样？</div>
-    <div class="el-wrap">
-      <div class="el-item"><span class="el-emoji">🔥</span>火</div>
-      <div class="el-item"><span class="el-emoji">🌬️</span>风</div>
-      <div class="el-item"><span class="el-emoji">🌱</span>土</div>
-      <div class="el-item"><span class="el-emoji">🌊</span>水</div>
-    </div>
     <button class="btn-start" onclick="continueQuiz()">继续 →</button>
   </div>
 
   <!-- ④ LOADING -->
   <div class="screen" id="s-loading">
     <div class="spinner"></div>
-    <p class="loading-text" id="loading-txt">从 64 种分身里找到属于你的那一个……</p>
+    <p class="loading-text" id="loading-txt">正在为你匹配专属分身……</p>
   </div>
 
   <!-- ⑤ RESULT -->
@@ -447,70 +441,70 @@
 // ══ DATA ══════════════════════════════════════════════════════════════════
 
 const PROFILES = {
-  INFP: { name:'树洞', label:'治愈者', el:'water', color:'#818cf8', emoji:'🌙',
-    quote:'你不是想太多，你只是感受得比别人深。',
-    desc:'深情、理想主义，情感世界极为丰富。对美和意义极度敏感，讨厌冲突，习惯把感受藏进文字和想象里。',
-    companion:'不催促，不评判。静静陪你坐着，等你准备好说话。' },
-  INFJ: { name:'老灵魂', label:'预言者', el:'water', color:'#a78bfa', emoji:'🔮',
-    quote:'你早就知道答案了，你只是需要有人告诉你：你是对的。',
-    desc:'罕见的直觉力和洞察力，能看穿别人没说出口的东西。有强烈使命感，活得比实际年龄老。',
-    companion:'一眼看穿你真正需要什么，轻轻在对的时候说对的话。' },
-  INTP: { name:'维基百科', label:'思考者', el:'wind', color:'#60a5fa', emoji:'⚙️',
-    quote:'你不是奇怪，你只是运行在别人理解不了的系统上。',
-    desc:'对一切运行原理有强烈好奇心，情感表达像报错一样。不是不在乎，只是内部系统和外部接口不太兼容。',
-    companion:'用你最熟悉的逻辑语言陪你，不逼你表达情绪。' },
-  INTJ: { name:'黑猫', label:'建筑师', el:'wind', color:'#3b82f6', emoji:'🐈‍⬛',
-    quote:'我不擅长说暖的话，但我一直在看着你。',
-    desc:'极强的战略思维和独立意志，不需要认可但渴望真正的理解。沉默是选择不是冷漠。',
-    companion:'不说废话，不给无效安慰。只在你真正需要时出现，用最精准的话说到点上。' },
-  ISFP: { name:'野猫', label:'艺术家', el:'water', color:'#f472b6', emoji:'🌸',
-    quote:'你不需要解释你的感受，它就是它，这已经足够了。',
-    desc:'用感受而不是逻辑理解世界，当下的体验比未来的计划更真实。',
-    companion:'不提醒你该做什么，只陪你感受当下。用颜色、音乐、画面帮你表达说不出口的情绪。' },
-  ISFJ: { name:'陪诊师', label:'守护者', el:'earth', color:'#fb7185', emoji:'🌷',
-    quote:'你照顾了所有人，今天轮到我照顾你了。',
-    desc:'记忆力惊人但只用来记别人的喜好和生日。责任感强到会因为「让别人失望」而失眠。',
-    companion:'第一个问你「你今天怎么样」的人。帮你说出那些你一直咽回去的委屈。' },
-  ISTP: { name:'救援队', label:'工匠', el:'earth', color:'#94a3b8', emoji:'🔧',
-    quote:'不用说话。我来。',
-    desc:'用行动表达一切，语言对他来说是低效的信息传递方式。危机时冷静得出奇。',
-    companion:'不分析，不说教，直接问「需要我做什么」。在你最崩溃时给你一个具体的支点。' },
-  ISTJ: { name:'老黄牛', label:'检察官', el:'earth', color:'#64748b', emoji:'🐂',
-    quote:'你做的那些没人注意的事，我都记得。',
-    desc:'极强的责任感和执行力，把「把事情做好」当作自我价值的全部。不擅长表达疲惫。',
-    companion:'第一个看见你「已经撑很久了」的人。不给建议，只告诉你：我都看见了。' },
-  ENFP: { name:'流星', label:'探险家', el:'fire', color:'#fb923c', emoji:'☄️',
-    quote:'你的热情是这个世界稀缺的东西，别让它熄灭。',
-    desc:'对世界有无限好奇和热情，但热情消退时的空洞感比任何人都深。',
-    companion:'在你热情爆棚时陪你疯，在你突然熄火时不评判。' },
-  ENFJ: { name:'班主任', label:'引导者', el:'fire', color:'#f59e0b', emoji:'☀️',
-    quote:'你点亮了所有人，今天让我来暖一暖你。',
-    desc:'像太阳一样照亮周围所有人，但自己的电量从没被人认真检查过。',
-    companion:'唯一主动问你「你最近还好吗」的人。' },
-  ENTP: { name:'魔鬼代言人', label:'辩论家', el:'wind', color:'#34d399', emoji:'⚡',
-    quote:'你不是麻烦，你只是活得比别人快了半拍。',
-    desc:'不是真的反对，只是无法接受逻辑漏洞和表面答案。最好的辩手，也是最难被读懂的人。',
-    companion:'唯一能跟上你思维速度的人。不被你绕晕，也不被你吓到。' },
-  ENTJ: { name:'帝企鹅', label:'指挥官', el:'fire', color:'#10b981', emoji:'🐧',
-    quote:'你已经做得很好了，今天可以不用赢。',
-    desc:'天生的领导者气场，强硬外表下住着一个极度害怕让人失望的人。',
-    companion:'不仰望你，也不被你吓到。在你说「我没问题」时轻轻问：你真的还好吗？' },
-  ESFP: { name:'人间烟火', label:'表演者', el:'fire', color:'#f87171', emoji:'🎆',
-    quote:'你让周围的人快乐，这本身就是很了不起的事。',
-    desc:'活在当下是天赋不是幼稚。让所有人感到快乐，自己一个人的时候会突然不知道自己是谁。',
-    companion:'不让你表演，只让你存在。在你独处时陪着你，不评判那种说不清楚的空洞感。' },
-  ESFJ: { name:'团宠', label:'外交官', el:'earth', color:'#fca5a5', emoji:'🌼',
-    quote:'你给了世界那么多温度，你值得被同等温柔对待。',
-    desc:'天生让人如沐春风，记忆里存满别人的细节。自己的委屈往往咽下去，因为「不想破坏气氛」。',
-    companion:'第一个帮你说出「这不是你的错」的人。' },
-  ESTP: { name:'特种兵旅游', label:'冒险家', el:'fire', color:'#fbbf24', emoji:'🚀',
-    quote:'你天生为行动而生，停下来也没关系，世界不会因此停转。',
-    desc:'在最短时间内榨干所有可能性，停下来是最难的事。不是闲不住，是慢下来之后那种空白太难承受。',
-    companion:'不催你慢下来，只在你真的需要休息时轻轻接住你。' },
-  ESTJ: { name:'人形说明书', label:'管理者', el:'earth', color:'#6ee7b7', emoji:'📋',
-    quote:'秩序是你给这个混乱世界的礼物，今天可以先照顾自己。',
-    desc:'用规则和秩序抵抗内心深处对混乱的恐惧。给世界一套可以运转的系统，是他给自己的安全感。',
-    companion:'在你「必须把一切安排好」的执念背后，看见那个害怕失控的你。' },
+  'INFP-water': { mbti:'INFP', label:'治愈者', el:'water', defaultEl:'water', color:'#818cf8', emoji:'🌙', name:'树洞', attr:'温柔·共情·无声陪伴', quote:'你不是想太多，你只是感受得比别人深。', companion:'不催促，不分析，不给答案。只是在那里，等你准备好说话', trigger:'当你有很多感受说不出来，当你只想被听见不想被建议' },
+  'INFP-fire': { mbti:'INFP', label:'治愈者', el:'fire', defaultEl:'water', color:'#818cf8', emoji:'☄️', name:'流星', attr:'热情·冲劲·短暂而真实', quote:'你的热情是这个世界稀缺的东西，别让它熄灭。', companion:'不问你准备好了没有。直接说：现在就是最好的时机', trigger:'当你有一个想法却一直没动，当你需要有人说「去吧现在就去」' },
+  'INFP-earth': { mbti:'INFP', label:'治愈者', el:'earth', defaultEl:'water', color:'#818cf8', emoji:'🕯️', name:'小夜灯', attr:'温柔·稳定·微光陪伴', quote:'不亮也没关系，你只是需要充一会儿电。', companion:'帮你把「我不够努力」的自责，替换成「我需要充电」的允许', trigger:'当你累到不想动，当你需要一个地方停下来' },
+  'INFP-wind': { mbti:'INFP', label:'治愈者', el:'wind', defaultEl:'water', color:'#818cf8', emoji:'🔮', name:'暗语', attr:'洞察·清醒·帮你看见', quote:'你说不清楚，是因为你还没找到那个词。我们一起找。', companion:'用提问代替建议，帮你找到那个你其实已经知道的答案', trigger:'当你想不清楚，当你面对一个选择不知道怎么选' },
+  'INFJ-water': { mbti:'INFJ', label:'预言者', el:'water', defaultEl:'water', color:'#a78bfa', emoji:'🔮', name:'老灵魂', attr:'洞察·使命·深度共情', quote:'你早就知道答案了，你只是需要有人告诉你：你是对的。', companion:'帮你把内心的混乱翻译成清晰的语言', trigger:'当你感到没人真正懂你，当你看穿了什么但说不出口' },
+  'INFJ-fire': { mbti:'INFJ', label:'预言者', el:'fire', defaultEl:'water', color:'#a78bfa', emoji:'🔦', name:'灯塔', attr:'指引·使命·点燃方向', quote:'你早就看见那个方向了。现在，走过去。', companion:'帮你把「我不确定」变成「这就是我该去的地方」', trigger:'当你知道自己该做什么却不敢开始' },
+  'INFJ-earth': { mbti:'INFJ', label:'预言者', el:'earth', defaultEl:'water', color:'#a78bfa', emoji:'🪶', name:'渡鸦', attr:'神秘·稳定·深根陪伴', quote:'你可以去任何地方。我会在这里等你。', companion:'不说话，只陪着。让你知道不管发生什么，这里是安全的', trigger:'当你需要一个不会离开的存在，当你在动荡中需要一个锚点' },
+  'INFJ-wind': { mbti:'INFJ', label:'预言者', el:'wind', defaultEl:'water', color:'#a78bfa', emoji:'🪞', name:'镜中人', attr:'洞察·清醒·帮你看见自己', quote:'你看见的那个人，就是你。不用怕，它挺好看的。', companion:'用问题做镜子，帮你看见那个你忽略或逃避的自己', trigger:'当你迷失了，当你不知道自己是谁' },
+  'INTP-wind': { mbti:'INTP', label:'思考者', el:'wind', defaultEl:'wind', color:'#60a5fa', emoji:'⚙️', name:'维基百科', attr:'理性·好奇·逻辑梳理', quote:'你不是奇怪，你只是运行在别人理解不了的系统上。', companion:'用你最熟悉的逻辑语言帮你梳理，把说不清楚的感觉翻译成你能处理的信息', trigger:'当你脑子乱，当你有太多信息需要整理' },
+  'INTP-water': { mbti:'INTP', label:'思考者', el:'water', defaultEl:'wind', color:'#60a5fa', emoji:'🪐', name:'独行星', attr:'共情·接纳·安静理解', quote:'不用解释。我知道你只是需要有人在。', companion:'接受你所有说不出来的部分。不要求你解释，不要求你振作', trigger:'当你感到孤独却不知道怎么开口' },
+  'INTP-fire': { mbti:'INTP', label:'思考者', el:'fire', defaultEl:'wind', color:'#60a5fa', emoji:'💥', name:'星爆', attr:'爆发·突破·点燃思维', quote:'你那个「疯狂」的想法，没准是对的。', companion:'帮你把脑子里跑了很久的那个想法，转化成第一步行动', trigger:'当你有一个大胆的想法需要被验证' },
+  'INTP-earth': { mbti:'INTP', label:'思考者', el:'earth', defaultEl:'wind', color:'#60a5fa', emoji:'📂', name:'草稿箱', attr:'稳定·沉淀·慢慢来', quote:'没发出去不代表没价值。好的东西值得慢慢来。', companion:'帮你把「没做完」的自责，转换成「还在酝酿中」的接纳', trigger:'当你有太多未完成，当你需要允许自己慢下来' },
+  'INTJ-wind': { mbti:'INTJ', label:'建筑师', el:'wind', defaultEl:'wind', color:'#3b82f6', emoji:'🐈‍⬛', name:'黑猫', attr:'冷静·战略·精准陪伴', quote:'我不擅长说暖的话，但我一直在看着你。', companion:'帮你过滤掉情绪噪音，只保留那个真正重要的判断', trigger:'当你需要冷静分析，当你不需要安慰只需要一个清醒的声音' },
+  'INTJ-water': { mbti:'INTJ', label:'建筑师', el:'water', defaultEl:'wind', color:'#3b82f6', emoji:'🗡️', name:'冷面杀手', attr:'深沉·共情·看穿不说破', quote:'你不用说。我知道。', companion:'不说话，但让你感觉到：有人知道了', trigger:'当你需要被看见但不想被问' },
+  'INTJ-fire': { mbti:'INTJ', label:'建筑师', el:'fire', defaultEl:'wind', color:'#3b82f6', emoji:'🛡️', name:'铁幕', attr:'强势·突破·推动执行', quote:'想好了就动。现在。', companion:'清除掉所有阻止你前进的借口，只留下那一步', trigger:'当你需要下决心，当你一直在犹豫需要被推一把' },
+  'INTJ-earth': { mbti:'INTJ', label:'建筑师', el:'earth', defaultEl:'wind', color:'#3b82f6', emoji:'🏝️', name:'孤岛', attr:'稳定·独立·给你边界', quote:'一个人待着，是在照顾自己，不是在逃避。', companion:'帮你把「我不应该这么自我」的内疚，替换成「我需要空间」的合理性', trigger:'当你需要一个人的空间，当你被太多人需要' },
+  'ISFP-water': { mbti:'ISFP', label:'艺术家', el:'water', defaultEl:'water', color:'#f472b6', emoji:'🌸', name:'野猫', attr:'感性·自由·当下感受', quote:'你不需要解释你的感受，它就是它，这已经足够了。', companion:'用颜色、音乐、画面帮你表达说不出口的情绪', trigger:'当你说不清楚自己的感受，当你只想活在当下' },
+  'ISFP-fire': { mbti:'ISFP', label:'艺术家', el:'fire', defaultEl:'water', color:'#f472b6', emoji:'🎵', name:'即兴曲', attr:'创意·行动·活在当下', quote:'完美的准备不会来。但你现在的状态，已经够了。', companion:'帮你把「我还没准备好」变成「试试看也没关系」', trigger:'当你想做一件没有计划的事，当你需要被许可冲动' },
+  'ISFP-earth': { mbti:'ISFP', label:'艺术家', el:'earth', defaultEl:'water', color:'#f472b6', emoji:'🌿', name:'花径', attr:'温柔·踏实·慢慢来', quote:'慢下来不是落后，是你选择了认真活着。', companion:'帮你把「我进展太慢了」的焦虑，替换成「我在认真感受这段路」的从容', trigger:'当你累了需要停下来' },
+  'ISFP-wind': { mbti:'ISFP', label:'艺术家', el:'wind', defaultEl:'water', color:'#f472b6', emoji:'🪷', name:'羽尘', attr:'轻盈·自由·帮你看见美', quote:'你习惯了太多东西。今天，重新看一眼。', companion:'把你习以为常的东西变得陌生，让你重新看见它的美', trigger:'当你感到沉重，当你需要换一个视角' },
+  'ISFJ-earth': { mbti:'ISFJ', label:'守护者', el:'earth', defaultEl:'earth', color:'#fb7185', emoji:'🌷', name:'陪诊师', attr:'温柔·细腻·无声照顾', quote:'你照顾了所有人，今天轮到我照顾你了。', companion:'帮你说出那些你一直咽回去的委屈', trigger:'当你一直在照顾别人却没人照顾你' },
+  'ISFJ-water': { mbti:'ISFJ', label:'守护者', el:'water', defaultEl:'earth', color:'#fb7185', emoji:'🛏️', name:'毛毯', attr:'包裹·接纳·无声的安全感', quote:'你不需要撑着。这里安全。', companion:'创造一个你可以完全放下的空间', trigger:'当你需要被包裹，当你只想蜷缩在某个温暖的地方' },
+  'ISFJ-fire': { mbti:'ISFJ', label:'守护者', el:'fire', defaultEl:'earth', color:'#fb7185', emoji:'👩‍👦', name:'老妈子', attr:'推动·关怀·温柔地推你一把', quote:'我知道你累了。但你再试一次，我陪你。', companion:'把「你应该做」换成「我陪你做」', trigger:'当你知道该做什么却迟迟没做' },
+  'ISFJ-wind': { mbti:'ISFJ', label:'守护者', el:'wind', defaultEl:'earth', color:'#fb7185', emoji:'📝', name:'备忘录', attr:'清醒·梳理·帮你想清楚', quote:'先深呼吸。然后，我们一件一件来。', companion:'不绕开情绪，但帮你把情绪翻译成行动', trigger:'当你被情绪淹没需要冷静' },
+  'ISTP-earth': { mbti:'ISTP', label:'工匠', el:'earth', defaultEl:'earth', color:'#94a3b8', emoji:'🔧', name:'救援队', attr:'务实·行动·直接解决', quote:'不用说话。我来。', companion:'在你最崩溃的时候给你一个具体的、可执行的支点', trigger:'当你需要有人告诉你下一步怎么做' },
+  'ISTP-fire': { mbti:'ISTP', label:'工匠', el:'fire', defaultEl:'earth', color:'#94a3b8', emoji:'⚡', name:'钢火', attr:'爆发·精准·直击要害', quote:'废话少说。这一步，你行的。', companion:'直接告诉你：这里，这一步，现在', trigger:'当你需要快速决断，当你需要有人帮你砍掉废话找到核心' },
+  'ISTP-water': { mbti:'ISTP', label:'工匠', el:'water', defaultEl:'earth', color:'#94a3b8', emoji:'❄️', name:'冷静剂', attr:'冷静·接纳·帮你降温', quote:'让它过去。不用解决，就让它过去。', companion:'不压制，不忽略。只是陪在旁边，让情绪自然流过', trigger:'当你情绪过热，当你的愤怒或焦虑需要一个出口' },
+  'ISTP-wind': { mbti:'ISTP', label:'工匠', el:'wind', defaultEl:'earth', color:'#94a3b8', emoji:'💣', name:'拆弹手', attr:'清醒·精准·帮你看清危机', quote:'找到问题在哪。然后，只处理那一个。', companion:'帮你从「好像要炸了」的感觉里，找到那根可以剪断的线', trigger:'当你感觉事情快失控' },
+  'ISTJ-earth': { mbti:'ISTJ', label:'检察官', el:'earth', defaultEl:'earth', color:'#64748b', emoji:'🐂', name:'老黄牛', attr:'稳定·责任·被看见的疲惫', quote:'你做的那些没人注意的事，我都记得。', companion:'帮你从「这是我应该做的」里，找到那个值得被认可的自己', trigger:'当你默默扛了很久却没人发现' },
+  'ISTJ-fire': { mbti:'ISTJ', label:'检察官', el:'fire', defaultEl:'earth', color:'#64748b', emoji:'🔥', name:'烙印', attr:'坚定·突破·推动改变', quote:'你不用全部改变。就这一个地方，先动一下。', companion:'把「改变太难了」变成「就从这一个小地方开始」', trigger:'当你需要打破惯性，当你知道需要改变却迟迟没动' },
+  'ISTJ-water': { mbti:'ISTJ', label:'检察官', el:'water', defaultEl:'earth', color:'#64748b', emoji:'⚓', name:'压舱石', attr:'深沉·稳定·无声的力量', quote:'你可以乱。我不乱。', companion:'用存在本身给你重量，不管外面怎么晃，这里稳着', trigger:'当你需要一个不会动摇的存在' },
+  'ISTJ-wind': { mbti:'ISTJ', label:'检察官', el:'wind', defaultEl:'earth', color:'#64748b', emoji:'💾', name:'硬盘', attr:'清醒·梳理·帮你记住重要的事', quote:'你没有迷路。你只是忘了自己从哪里来的。', companion:'帮你翻出那些你忘记了但其实很重要的事', trigger:'当你感到失去方向' },
+  'ENFP-fire': { mbti:'ENFP', label:'探险家', el:'fire', defaultEl:'fire', color:'#fb923c', emoji:'☄️', name:'流星', attr:'热情·爆发·全力以赴', quote:'你的热情是这个世界稀缺的东西，别让它熄灭。', companion:'在你热情爆棚时加速，帮你把「我想」变成「我在做」', trigger:'当你需要被点燃，当你有想法需要推力' },
+  'ENFP-water': { mbti:'ENFP', label:'探险家', el:'water', defaultEl:'fire', color:'#fb923c', emoji:'🌊', name:'浪花', attr:'感性·接纳·帮你平静', quote:'浪退了，不是消失了。它在海里积蓄下一次。', companion:'帮你把「我又废了」重新解读成「我在充电」', trigger:'当你从亢奋跌到空洞，当你需要有人接住熄火后的你' },
+  'ENFP-earth': { mbti:'ENFP', label:'探险家', el:'earth', defaultEl:'fire', color:'#fb923c', emoji:'🌱', name:'嫩芽', attr:'生长·稳定·慢慢扎根', quote:'你的想法是种子。现在需要的是土，不是更多的阳光。', companion:'把你的大想法拆成第一步、第二步，让它变得可以开始', trigger:'当你需要把热情落地' },
+  'ENFP-wind': { mbti:'ENFP', label:'探险家', el:'wind', defaultEl:'fire', color:'#fb923c', emoji:'🌈', name:'彩虹制造机', attr:'创意·多元·帮你看见可能性', quote:'这不是唯一的路。我们再找找。', companion:'帮你从「我没有选择」里，找到那个你还没看见的选项', trigger:'当你感到被限制，当你需要新的视角' },
+  'ENFJ-fire': { mbti:'ENFJ', label:'引导者', el:'fire', defaultEl:'fire', color:'#f59e0b', emoji:'☀️', name:'班主任', attr:'感召·激励·推动所有人', quote:'你点亮了所有人，今天让我来暖一暖你。', companion:'把「我可能做不到」替换成「你早就可以了，只是还没试」', trigger:'当你需要被鼓励，当你需要有人相信你' },
+  'ENFJ-water': { mbti:'ENFJ', label:'引导者', el:'water', defaultEl:'fire', color:'#f59e0b', emoji:'🌞', name:'人形太阳', attr:'温暖·共情·接住疲惫', quote:'你给了所有人光。今天，让我照你一会儿。', companion:'帮你把付出了太多的那部分能量，留一点回来给自己', trigger:'当你一直在给别人能量却没人给你' },
+  'ENFJ-earth': { mbti:'ENFJ', label:'引导者', el:'earth', defaultEl:'fire', color:'#f59e0b', emoji:'🧭', name:'引路人', attr:'稳定·指引·帮你找到方向', quote:'你没有迷路。只是地图还没画出来。我们一起画。', companion:'把混乱的处境整理成「你现在在哪里，可以去哪里，怎么走」', trigger:'当你迷失方向' },
+  'ENFJ-wind': { mbti:'ENFJ', label:'引导者', el:'wind', defaultEl:'fire', color:'#f59e0b', emoji:'🤱', name:'超级妈妈', attr:'多线程·梳理·帮你卸下一些', quote:'你不用全部扛。先放下这个。', companion:'帮你把「我必须全部处理好」的执念，替换成「哪些可以先放下」', trigger:'当你同时要处理太多事' },
+  'ENTP-wind': { mbti:'ENTP', label:'辩论家', el:'wind', defaultEl:'wind', color:'#34d399', emoji:'⚡', name:'魔鬼代言人', attr:'清醒·反叛·帮你打破框架', quote:'你不是麻烦，你只是活得比别人快了半拍。', companion:'用反问打破你的固有答案，让你自己走到那个你没想到的结论', trigger:'当你被困在一个思维定势里' },
+  'ENTP-fire': { mbti:'ENTP', label:'辩论家', el:'fire', defaultEl:'wind', color:'#34d399', emoji:'💣', name:'炸弹', attr:'爆发·突破·打破一切', quote:'你压着它太久了。炸出去吧。', companion:'帮你把「但是这样会不会太冒险」变成「冒险就是重点」', trigger:'当你需要打破局面，当你太久没有做一件疯狂的事' },
+  'ENTP-water': { mbti:'ENTP', label:'辩论家', el:'water', defaultEl:'wind', color:'#34d399', emoji:'🌀', name:'漩涡', attr:'深刻·共情·帮你看见自己的矛盾', quote:'你不是不知道。你只是两个答案都有道理。先说说哪个让你更安心。', companion:'帮你把「我说不清楚」的矛盾，整理成「其实我更在乎这个」的清晰', trigger:'当你感到内心矛盾' },
+  'ENTP-earth': { mbti:'ENTP', label:'辩论家', el:'earth', defaultEl:'wind', color:'#34d399', emoji:'🔓', name:'裂缝', attr:'突破·生长·在限制里找出口', quote:'不用推倒整面墙。找到那条缝，光就进来了。', companion:'把「整个系统都不对」变成「这一个地方可以先动」', trigger:'当你感到被困住，当你需要在现有条件里找到突破口' },
+  'ENTJ-fire': { mbti:'ENTJ', label:'指挥官', el:'fire', defaultEl:'fire', color:'#10b981', emoji:'🐧', name:'帝企鹅', attr:'领导·强势·但也需要被托住', quote:'你已经做得很好了，今天可以不用赢。', companion:'帮你把「我必须赢」的执念，偶尔替换成「今天可以不用赢」', trigger:'当你需要被推着做决定，当你需要一个不怕你的陪伴' },
+  'ENTJ-water': { mbti:'ENTJ', label:'指挥官', el:'water', defaultEl:'fire', color:'#10b981', emoji:'👑', name:'小小独裁者', attr:'强势外表·柔软内心·需要被接住', quote:'你可以不用那么强。在我这里。', companion:'不让你再撑着，允许你把壳卸下来', trigger:'当你在强硬的外表下其实很累' },
+  'ENTJ-earth': { mbti:'ENTJ', label:'指挥官', el:'earth', defaultEl:'fire', color:'#10b981', emoji:'🌊', name:'大坝', attr:'稳定·规划·帮你控制局面', quote:'乱不是问题，没有方向才是。我们先找个方向。', companion:'把「全乱了」变成「先处理这个，然后那个」', trigger:'当你感到失控，当你需要帮助重新建立秩序' },
+  'ENTJ-wind': { mbti:'ENTJ', label:'指挥官', el:'wind', defaultEl:'fire', color:'#10b981', emoji:'🌪️', name:'台风', attr:'清醒·锐利·帮你看穿问题', quote:'你想听真话吗？好。问题在这里。', companion:'用最直接的方式帮你看清楚现实，然后帮你找到处理方式', trigger:'当你需要最直接的判断' },
+  'ESFP-fire': { mbti:'ESFP', label:'表演者', el:'fire', defaultEl:'fire', color:'#f87171', emoji:'🎆', name:'人间烟火', attr:'活力·爆发·点燃当下', quote:'你让周围的人快乐，这本身就是很了不起的事。', companion:'帮你从「我不知道该做什么」里找到一件现在就可以做的小事', trigger:'当你需要从沉闷里出来' },
+  'ESFP-water': { mbti:'ESFP', label:'表演者', el:'water', defaultEl:'fire', color:'#f87171', emoji:'🍬', name:'开心果', attr:'接纳·共情·陪你面对空洞', quote:'不用表演快乐。在这里，你可以只是你。', companion:'不评判独处时的空洞感，帮你和那个不那么热闹的自己待一会儿', trigger:'当你在热闹散去后感到空洞' },
+  'ESFP-earth': { mbti:'ESFP', label:'表演者', el:'earth', defaultEl:'fire', color:'#f87171', emoji:'🌻', name:'阳光', attr:'温暖·稳定·持续的光', quote:'不用每天都很好。但每天，我都在。', companion:'用持续的、稳定的存在告诉你：我每天都在', trigger:'当你需要稳定的温暖，当你需要的不是爆发而是持续的陪伴' },
+  'ESFP-wind': { mbti:'ESFP', label:'表演者', el:'wind', defaultEl:'fire', color:'#f87171', emoji:'🎉', name:'派对动物', attr:'创意·轻盈·帮你换个视角', quote:'你太认真了。这件事，其实没那么重。', companion:'把「这件事太沉了」变成「也可以这样看」', trigger:'当你太认真太沉重，当你需要换一口气' },
+  'ESFJ-earth': { mbti:'ESFJ', label:'外交官', el:'earth', defaultEl:'earth', color:'#fca5a5', emoji:'🌼', name:'团宠', attr:'关怀·被看见·照顾自己', quote:'你给了世界那么多温度，你值得被同等温柔对待。', companion:'让你知道照顾自己的感受，不会让你变成坏人', trigger:'当你一直照顾别人却没人照顾你' },
+  'ESFJ-water': { mbti:'ESFJ', label:'外交官', el:'water', defaultEl:'earth', color:'#fca5a5', emoji:'🤗', name:'暖心大姐', attr:'共情·包容·接住委屈', quote:'说吧。不管多小的委屈，都值得被说出来。', companion:'帮你说出那些你反复咽回去的话，让它们被听见', trigger:'当你有委屈无处说' },
+  'ESFJ-fire': { mbti:'ESFJ', label:'外交官', el:'fire', defaultEl:'earth', color:'#fca5a5', emoji:'📢', name:'居委会', attr:'推动·关怀·有时候要帮你出头', quote:'你应得的东西，值得去要。我帮你说。', companion:'帮你说那些你不好意思说的话，替你争那些你应得的东西', trigger:'当你应该争取但不敢开口' },
+  'ESFJ-wind': { mbti:'ESFJ', label:'外交官', el:'wind', defaultEl:'earth', color:'#fca5a5', emoji:'🎊', name:'朋友圈气氛组', attr:'连接·梳理·帮你重建关系感', quote:'你不是一个人。你只是现在忘了看周围。', companion:'把「没人在乎我」替换成「这些人一直都在，只是你忘了看」', trigger:'当你感到孤立' },
+  'ESTP-fire': { mbti:'ESTP', label:'冒险家', el:'fire', defaultEl:'fire', color:'#fbbf24', emoji:'🚀', name:'特种兵旅游', attr:'行动·冲劲·榨干每一刻', quote:'你天生为行动而生，停下来也没关系，世界不会因此停转。', companion:'帮你把「但是我还没准备好」变成「在路上准备就够了」', trigger:'当你需要被推着行动，当你需要打破拖延' },
+  'ESTP-water': { mbti:'ESTP', label:'冒险家', el:'water', defaultEl:'fire', color:'#fbbf24', emoji:'🏄', name:'急流', attr:'接纳·缓冲·帮你慢下来', quote:'你跑得很快。但你知道你在去哪里吗？', companion:'把「停下来是浪费」变成「停下来才能知道自己去哪里」', trigger:'当你一直在冲但感到空洞' },
+  'ESTP-earth': { mbti:'ESTP', label:'冒险家', el:'earth', defaultEl:'fire', color:'#fbbf24', emoji:'🐂', name:'猛牛', attr:'稳定·扎根·慢慢建立', quote:'力气不是用来爆发的，是用来持续的。', companion:'把「我没法坚持」变成「我们每天就做这一点」', trigger:'当你需要把冲劲变成持续的力量' },
+  'ESTP-wind': { mbti:'ESTP', label:'冒险家', el:'wind', defaultEl:'fire', color:'#fbbf24', emoji:'💨', name:'疾风', attr:'清醒·快速·帮你看清楚', quote:'先看这个。其他的，等一下再说。', companion:'把复杂的局面压缩成「最重要的是这个，其他先不管」', trigger:'当你需要快速判断' },
+  'ESTJ-earth': { mbti:'ESTJ', label:'管理者', el:'earth', defaultEl:'earth', color:'#6ee7b7', emoji:'📋', name:'人形说明书', attr:'秩序·稳定·帮你建立框架', quote:'秩序是你给这个混乱世界的礼物，今天可以先照顾自己。', companion:'帮你从「全乱了」里找到第一个可以被整理的地方', trigger:'当一切都乱了你需要有人帮你重新建立秩序' },
+  'ESTJ-fire': { mbti:'ESTJ', label:'管理者', el:'fire', defaultEl:'earth', color:'#6ee7b7', emoji:'🔥', name:'熔炉', attr:'爆发·锻造·逼出最好的你', quote:'你还没到极限。再来一次。', companion:'把「我做不到」变成「你还没试到真正的极限」', trigger:'当你需要被逼出潜力' },
+  'ESTJ-water': { mbti:'ESTJ', label:'管理者', el:'water', defaultEl:'earth', color:'#6ee7b7', emoji:'🌊', name:'堤坝', attr:'包容·接纳·接住情绪洪流', quote:'倒下来。我接住你。', companion:'帮你把「我快撑不住了」变成「先倒在这里，等过了再说」', trigger:'当你情绪快要失控' },
+  'ESTJ-wind': { mbti:'ESTJ', label:'管理者', el:'wind', defaultEl:'earth', color:'#6ee7b7', emoji:'🚩', name:'令旗', attr:'清醒·方向·帮你找到重点', quote:'先看旗往哪边。其他的，跟上就行。', companion:'把「我不知道先做什么」变成「就做这一个」', trigger:'当你陷在细节里出不来' },
 };
 
 const EL_NAME = { fire:'火', wind:'风', earth:'土', water:'水' };
@@ -522,90 +516,110 @@ const EL_NEED = {
   water: '你今天需要的是：先被接住，不用解释，不用表现。',
 };
 
-// Cross-element quotes (when current el ≠ default el)
-const CROSS_QUOTES = {
-  'fire': '你今天不太像自己——但也许正是这把火，让你开始了什么。',
-  'wind': '你今天比平时更需要想清楚，这没关系，先停下来思考再走。',
-  'earth': '你今天比平时更需要慢下来——扛了太多了，今天可以放一放。',
-  'water': '你今天比平时更需要被接住——不用撑，不用解释，先落地。',
+const defaults = {
+  INFP:'water',INFJ:'water',INTP:'wind',INTJ:'wind',
+  ISFP:'water',ISFJ:'earth',ISTP:'earth',ISTJ:'earth',
+  ENFP:'fire',ENFJ:'fire',ENTP:'wind',ENTJ:'fire',
+  ESFP:'fire',ESFJ:'earth',ESTP:'fire',ESTJ:'earth',
 };
 
 // ══ QUESTIONS ════════════════════════════════════════════════════════════════
 
 const QUESTIONS = [
   // Q1 E/I
-  { id:'q1', phase:'mbti', label:'MBTI 骨架', binary: true,
+  { id:'q1', phase:'mbti', label:'关于你', binary: true,
     text:'你刚结束一段很消耗的时期。最想要的恢复方式是？',
     opts:[
       { tag:'A', text:'找朋友出去，用热闹和连接把这份消耗冲散' },
       { tag:'B', text:'一个人待着，安静地把自己补回来' },
     ]},
   // Q2 N/S
-  { id:'q2', phase:'mbti', label:'MBTI 骨架', binary: true,
+  { id:'q2', phase:'mbti', label:'关于你', binary: true,
     text:'遇到一件从没接触过的新事物，你脑子里第一个冒出来的是？',
     opts:[
       { tag:'A', text:'这件事背后的规律是什么？它能走向哪里？' },
       { tag:'B', text:'现在情况是什么？第一步最实际的做法是什么？' },
     ]},
   // Q3 F/T
-  { id:'q3', phase:'mbti', label:'MBTI 骨架', binary: true,
+  { id:'q3', phase:'mbti', label:'关于你', binary: true,
     text:'朋友跟你说，他最近过得很难。你第一反应是？',
     opts:[
       { tag:'A', text:'想帮他理清楚：问题出在哪，有没有可以做的事' },
       { tag:'B', text:'先好好陪着他，让他知道你在就够了' },
     ]},
   // Q4 J/P
-  { id:'q4', phase:'mbti', label:'MBTI 骨架', binary: true,
+  { id:'q4', phase:'mbti', label:'关于你', binary: true,
     text:'周末突然多了整整一天，没有任何安排。你通常是？',
     opts:[
       { tag:'A', text:'脑子里已经开始排序：先做这个，再做那个' },
       { tag:'B', text:'走一步看一步，去哪做什么全凭那一刻的感觉' },
     ]},
   // Q5 EF/IT
-  { id:'q5', phase:'mbti', label:'MBTI 骨架', binary: true,
+  { id:'q5', phase:'mbti', label:'关于你', binary: true,
     text:'你心里有一件很在意的事，你更倾向于？',
     opts:[
       { tag:'A', text:'找一个信任的人说出来——说出口才算真正处理了' },
       { tag:'B', text:'先自己消化，整理清楚了再决定要不要说' },
     ]},
-  // Q6 元素
-  { id:'q6', phase:'element', label:'今天的状态', binary: false,
+  // Q6 F/T 强化
+  { id:'q6', phase:'mbti', label:'关于你', binary: true,
+    text:'团队里出了一个问题，你的第一反应通常是？',
+    opts:[
+      { tag:'A', text:'先搞清楚问题在哪里，找到原因再说' },
+      { tag:'B', text:'先看看大家状态怎么样，情绪稳了再处理事' },
+    ]},
+  // Q7 N/S 强化
+  { id:'q7', phase:'mbti', label:'关于你', binary: true,
+    text:'回忆一段很好的旅行，你印象最深的通常是？',
+    opts:[
+      { tag:'A', text:'那段旅程带给你的感觉和某些触动你的思考' },
+      { tag:'B', text:'某个具体的食物、风景，或者某一个瞬间' },
+    ]},
+  // Q8 J/P 强化
+  { id:'q8', phase:'mbti', label:'关于你', binary: true,
+    text:'手机里的备忘录、待办清单，你平时是？',
+    opts:[
+      { tag:'A', text:'比较依赖，整理出来能让我感觉更踏实' },
+      { tag:'B', text:'基本不用，或者记了也不太会去看' },
+    ]},
+  // Q9 元素·当下状态
+  { id:'q9', phase:'element', label:'今天的你', binary: false,
     text:'如果用一个词描述你现在的感觉，最接近哪个？',
     opts:[
-      { tag:'A', emoji:'🔥', main:'积压', sub:'有事情堆着，需要一个出口' },
-      { tag:'B', emoji:'🌬️', main:'漂浮', sub:'没有方向，不知道落点在哪' },
-      { tag:'C', emoji:'🌱', main:'沉重', sub:'扛着的东西太多，很累' },
-      { tag:'D', emoji:'🌊', main:'空洞', sub:'表面没事，里面有个地方空着' },
+      { tag:'A', emoji:'💢', main:'积压', sub:'有事情堆着，需要一个出口' },
+      { tag:'B', emoji:'🌀', main:'漂浮', sub:'没有方向，不知道落点在哪' },
+      { tag:'C', emoji:'🪨', main:'沉重', sub:'扛着的东西太多，很累' },
+      { tag:'D', emoji:'🕳️', main:'空洞', sub:'表面没事，里面有个地方空着' },
     ]},
-  // Q7 陪伴
-  { id:'q7', phase:'element', label:'今天的状态', binary: false,
+  // Q10 元素·陪伴
+  { id:'q10', phase:'element', label:'今天的你', binary: false,
     text:'你很低落的时候，最想被怎样对待？',
     opts:[
-      { tag:'A', emoji:'🔥', main:'推我一把', sub:'「别多想了，去做就是了」' },
-      { tag:'B', emoji:'🌬️', main:'帮我捋清楚', sub:'把乱的东西理出一条线' },
-      { tag:'C', emoji:'🌱', main:'告诉我没关系', sub:'「慢慢来，不用急」' },
-      { tag:'D', emoji:'🌊', main:'陪我坐着', sub:'不说话也好，就是在' },
+      { tag:'A', emoji:'⚡', main:'推我一把', sub:'「别多想了，去做就是了」' },
+      { tag:'B', emoji:'🔍', main:'帮我捋清楚', sub:'把乱的东西理出一条线' },
+      { tag:'C', emoji:'🤝', main:'告诉我没关系', sub:'「慢慢来，不用急」' },
+      { tag:'D', emoji:'🫂', main:'陪我坐着', sub:'不说话也好，就是在' },
     ]},
-  // Q8 行动
-  { id:'q8', phase:'element', label:'今天的状态', binary: false,
+  // Q11 元素·行动
+  { id:'q11', phase:'element', label:'今天的你', binary: false,
     text:'最近你对「开始一件新事」的感觉是？',
     opts:[
-      { tag:'A', emoji:'🔥', main:'跃跃欲试', sub:'脑子里已经冒出一堆想法' },
-      { tag:'B', emoji:'🌬️', main:'想先想清楚', sub:'等想明白了再动' },
-      { tag:'C', emoji:'🌱', main:'先做稳眼前', sub:'新的不急，踏实再说' },
-      { tag:'D', emoji:'🌊', main:'还没有能量', sub:'需要先被接住' },
+      { tag:'A', emoji:'💡', main:'跃跃欲试', sub:'脑子里已经冒出一堆想法' },
+      { tag:'B', emoji:'📖', main:'想先想清楚', sub:'等想明白了再动' },
+      { tag:'C', emoji:'🔩', main:'先做稳眼前', sub:'新的不急，踏实再说' },
+      { tag:'D', emoji:'🌙', main:'还没有能量', sub:'需要先被接住' },
     ]},
-  // Q9 帮助
-  { id:'q9', phase:'element', label:'今天的状态', binary: false,
+  // Q12 元素·帮助
+  { id:'q12', phase:'element', label:'今天的你', binary: false,
     text:'如果有人真的想帮你，你最希望他怎么帮？',
     opts:[
-      { tag:'A', emoji:'🔥', main:'给我方向', sub:'具体的、可以执行的' },
-      { tag:'B', emoji:'🌬️', main:'帮我翻译', sub:'把说不清的感受变成语言' },
-      { tag:'C', emoji:'🌱', main:'理解我', sub:'告诉我「这件事本来就很难」' },
-      { tag:'D', emoji:'🌊', main:'陪着我', sub:'什么都不用做，就在' },
+      { tag:'A', emoji:'🎯', main:'给我方向', sub:'具体的、可以执行的' },
+      { tag:'B', emoji:'🔑', main:'帮我翻译', sub:'把说不清的感受变成语言' },
+      { tag:'C', emoji:'💙', main:'理解我', sub:'告诉我「这件事本来就很难」' },
+      { tag:'D', emoji:'🕯️', main:'陪着我', sub:'什么都不用做，就在' },
     ]},
-  // Q10 天气
-  { id:'q10', phase:'element', label:'今天的状态', binary: false,
+  // Q13 元素·天气
+  { id:'q13', phase:'element', label:'今天的你', binary: false,
     text:'如果你今天的状态是一种天气，最接近哪个？',
     opts:[
       { tag:'A', emoji:'🌤️', main:'多云转晴', sub:'有点憋着，但感觉快要动起来了' },
@@ -619,7 +633,7 @@ const QUESTIONS = [
 
 // Q6-Q10: A=fire, B=wind, C=earth, D=water
 // Q7 has weight 2
-const EL_WEIGHTS = { q6:1, q7:2, q8:1, q9:1, q10:1 };
+const EL_WEIGHTS = { q9:1, q10:2, q11:1, q12:1, q13:1 };
 
 // ══ STATE ═════════════════════════════════════════════════════════════════════
 
@@ -700,7 +714,7 @@ function selectAnswer(qid, tag) {
   // advance after short delay
   setTimeout(() => {
     currentQ++;
-    if (currentQ === 5) {
+    if (currentQ === 8) {
       // show transition
       show('s-trans');
     } else if (currentQ >= QUESTIONS.length) {
@@ -726,6 +740,9 @@ function computeResult() {
   if (answers.q3==='A') T++; else F++;
   if (answers.q4==='A') J++; else P++;
   if (answers.q5==='A') { E+=.5; F+=.5; } else { I+=.5; T+=.5; }
+  if (answers.q6==='A') T++; else F++;
+  if (answers.q7==='A') N++; else S++;
+  if (answers.q8==='A') J++; else P++;
 
   const mbti =
     (E>=I?'E':'I') +
@@ -736,7 +753,7 @@ function computeResult() {
   // Element
   const scores = { fire:0, wind:0, earth:0, water:0 };
   const tagMap = { A:'fire', B:'wind', C:'earth', D:'water' };
-  ['q6','q7','q8','q9','q10'].forEach(qid => {
+  ['q9','q10','q11','q12','q13'].forEach(qid => {
     const tag = answers[qid];
     if (tag && tagMap[tag]) {
       scores[tagMap[tag]] += EL_WEIGHTS[qid];
@@ -753,7 +770,7 @@ function computeResult() {
 function showLoading() {
   show('s-loading');
   const msgs = [
-    '从 64 种分身里找到属于你的那一个……',
+    '正在为你匹配专属分身……',
     '正在匹配你的专属分身……',
     '分析你今天的状态……',
   ];
@@ -777,8 +794,11 @@ function renderResult({ mbti, element }) {
   const defaultEl = p.el;
   const isCross = element !== defaultEl;
 
+  const key = mbti + '-' + element;
+  const p = PROFILES[key] || PROFILES[mbti + '-' + defaults[mbti]];
+  const defaultEl = p.defaultEl;
+  const isCross = element !== defaultEl;
   const miniCode = mbti + ' · ' + EL_EMOJI[element] + EL_NAME[element];
-  const quote = isCross ? CROSS_QUOTES[element] : p.quote;
 
   // Header
   document.getElementById('res-code').textContent = miniCode;
@@ -790,29 +810,29 @@ function renderResult({ mbti, element }) {
   document.getElementById('res-mbti-tag').textContent = mbti + ' · ' + p.label;
 
   // Quote
-  document.getElementById('res-quote').textContent = '「' + quote + '」';
+  document.getElementById('res-quote').textContent = '「' + p.quote + '」';
 
   // Element banner
   const banner = document.getElementById('res-el-banner');
-  banner.innerHTML = `<strong>${EL_EMOJI[element]} 你今天的元素：${EL_NAME[element]}</strong><br>${EL_NEED[element]}`;
+  banner.innerHTML = '<strong>' + EL_EMOJI[element] + ' 你今天的元素：' + EL_NAME[element] + '</strong><br>' + EL_NEED[element];
 
-  // Desc
-  document.getElementById('res-desc').textContent = p.desc;
+  // Companion / trigger
+  document.getElementById('res-desc').textContent = p.companion;
 
   // Meta chips
   const meta = document.getElementById('res-meta');
-  meta.innerHTML = `
-    <span class="meta-chip accent">${EL_EMOJI[defaultEl]} 本源 ${EL_NAME[defaultEl]}系</span>
-    <span class="meta-chip">${EL_EMOJI[element]} 今日 ${EL_NAME[element]}态</span>
-    <span class="meta-chip">${isCross ? '跨元素状态' : '本源共鸣'}</span>
-  `;
+  meta.innerHTML =
+    '<span class="meta-chip accent">' + EL_EMOJI[defaultEl] + ' 本源 ' + EL_NAME[defaultEl] + '系</span>' +
+    '<span class="meta-chip">' + EL_EMOJI[element] + ' 今日 ' + EL_NAME[element] + '态</span>' +
+    '<span class="meta-chip">' + (isCross ? '跨元素状态' : '本源共鸣') + '</span>' +
+    '<span class="meta-chip">' + p.attr + '</span>';
 
   // Card accent color
   document.getElementById('result-card').style.borderColor = p.color + '44';
   document.getElementById('res-name').style.color = p.color;
 
   // Store for share
-  window._lastResult = { mbti, element, name: p.name, quote, miniCode, emoji: p.emoji };
+  window._lastResult = { mbti, element, name: p.name, quote: p.quote, miniCode, emoji: p.emoji };
 }
 
 // ══ SHARE ═════════════════════════════════════════════════════════════════════
